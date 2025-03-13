@@ -310,11 +310,15 @@ impl Vm {
         let program = self.program.as_function();
 
         let mut out_wrapper = WriteWrapper {
-            write: output as *const dyn Write as *mut dyn Write,
+            write: unsafe {
+                std::mem::transmute::<*mut (dyn Write + '_), *mut (dyn Write + 'static)>(output)
+            },
         };
 
         let mut in_wrapper = ReadWrapper {
-            read: input as *const dyn Read as *mut dyn Read,
+            read: unsafe {
+                std::mem::transmute::<*mut (dyn Read + '_), *mut (dyn Read + 'static)>(input)
+            },
         };
 
         unsafe {
